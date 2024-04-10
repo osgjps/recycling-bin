@@ -6,6 +6,7 @@ import io.github.emojiconmc.recyclingbin.file.LangFile;
 import io.github.emojiconmc.recyclingbin.menu.Menu;
 import io.github.emojiconmc.recyclingbin.menu.MenuButton;
 import io.github.emojiconmc.recyclingbin.util.ItemBuilder;
+import org.bukkit.Sound;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -199,7 +200,13 @@ public class RecyclingMenu extends Menu {
         }
 
         clickedButton = true;
-        player.closeInventory();
+		player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_WORK_WEAPONSMITH, 1.0f, 1.0f);
+		for (int i = 0; i < outputSlots.size(); i++) {
+			inventory.setItem(outputSlots.get(i), null);
+		}
+		inventory.setItem(playerSlot,null);
+		
+        //player.closeInventory();
     }
 
     public void switchRecipe(Player player) {

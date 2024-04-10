@@ -1,9 +1,10 @@
 package io.github.emojiconmc.recyclingbin.block;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
+//import com.mojang.authlib.GameProfile;
+//import com.mojang.authlib.properties.Property;
 import io.github.emojiconmc.recyclingbin.RecyclingBinPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -11,9 +12,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.SkullMeta;
 
+//import com.destroystokyo.paper.profile.PlayerProfile;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
+
+
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
+import java.net.URL;
+
+
 
 public class RecyclingBlock {
 
@@ -21,22 +30,26 @@ public class RecyclingBlock {
     private ItemStack itemStack;
 
     private RecyclingBlock(RecyclingBinPlugin plugin) {
-        itemStack = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta blockMeta = (SkullMeta) itemStack.getItemMeta();
-        blockMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&',
-                plugin.getConfig().getString("recycling-block-name", ChatColor.GRAY + "Recycling Bin")));
-        GameProfile gameProfile = new GameProfile(UUID.fromString("b9653dbf-3499-433f-bb03-5a03c1a2fc25"), null);
-        gameProfile.getProperties().put("textures", new Property("textures", plugin.getConfig().getString("recycling-block-texture",
-                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzI1MThkMDRmOWMwNmM5NWRkMGVkYWQ2MTdhYmI5M2QzZDg2NTdmMDFlNjU5MDc5ZDMzMGNjYTZmNjViY2NmNyJ9fX0=")));
-        try {
-            Field field = blockMeta.getClass().getDeclaredField("profile");
-            field.setAccessible(true);
-            field.set(blockMeta, gameProfile);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
 
-        itemStack.setItemMeta(blockMeta);
+		PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(),ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("recycling-block-name", ChatColor.GRAY + "Recycling Bin"))); // Get a new player profile
+		PlayerTextures textures = profile.getTextures();
+		URL urlObject;
+		try {
+			String url = "http://textures.minecraft.net/texture/9ce9bfa474e280ab28536dde3a768f7be2c141a4658c99c5954222f86f4f413b";
+			urlObject = new URL(url); // The URL to the skin, for example: https://textures.minecraft.net/texture/18813764b2abc94ec3c3bc67b9147c21be850cdf996679703157f4555997ea63a
+		} catch (java.net.MalformedURLException exception) {
+			throw new RuntimeException("Invalid URL", exception);
+		}
+		textures.setSkin(urlObject); // Set the skin of the player profile to the URL
+		profile.setTextures(textures);
+		
+		
+        itemStack = new ItemStack(Material.PLAYER_HEAD);
+		SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
+		meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("recycling-block-name", ChatColor.GRAY + "Recycling Bin")));
+		meta.setOwnerProfile(profile); // Set the owning player of the head to the player profile
+		itemStack.setItemMeta(meta);
+		
     }
 
     public void initRecipe(RecyclingBinPlugin plugin) {
